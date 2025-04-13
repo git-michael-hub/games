@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import SlotMachine from './components/SlotMachine';
-import HorseRace from './components/HorseRace';
+import Chess from './components/Chess';
+import Todo from './components/Todo';
 
 const AppContainer = styled.div`
   display: flex;
@@ -28,12 +29,12 @@ const TabContainer = styled.div`
   gap: 10px;
 `;
 
-const Tab = styled.button<{ active: boolean }>`
+const Tab = styled.button<{ $active: boolean }>`
   padding: 10px 20px;
-  background: ${props => props.active ? 
+  background: ${props => props.$active ? 
     'linear-gradient(45deg, #FFD700 0%, #FFA500 100%)' : 
     'linear-gradient(45deg, #333 0%, #666 100%)'};
-  color: ${props => props.active ? 'black' : 'white'};
+  color: ${props => props.$active ? 'black' : 'white'};
   border: none;
   border-radius: 5px;
   cursor: pointer;
@@ -53,23 +54,28 @@ const GameContainer = styled.div`
 `;
 
 const App: React.FC = () => {
-  const [activeGame, setActiveGame] = useState<'slots' | 'horserace'>('slots');
+  const [activeGame, setActiveGame] = useState<'slots' | 'horserace' | 'carrace' | 'chess' | 'todo'>('slots');
   
   return (
     <AppContainer>
       <Title>Vegas Games</Title>
       
       <TabContainer>
-        <Tab active={activeGame === 'slots'} onClick={() => setActiveGame('slots')}>
+        <Tab $active={activeGame === 'slots'} onClick={() => setActiveGame('slots')}>
           Slot Machine
         </Tab>
-        <Tab active={activeGame === 'horserace'} onClick={() => setActiveGame('horserace')}>
-          Horse Racing
+        <Tab $active={activeGame === 'chess'} onClick={() => setActiveGame('chess')}>
+          Chess
+        </Tab>
+        <Tab $active={activeGame === 'todo'} onClick={() => setActiveGame('todo')}>
+          Todo List
         </Tab>
       </TabContainer>
       
       <GameContainer>
-        {activeGame === 'slots' ? <SlotMachine /> : <HorseRace />}
+        {activeGame === 'slots' && <SlotMachine />}
+        {activeGame === 'chess' && <Chess />}
+        {activeGame === 'todo' && <Todo />}
       </GameContainer>
     </AppContainer>
   );

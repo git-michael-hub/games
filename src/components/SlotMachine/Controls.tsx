@@ -20,27 +20,27 @@ const BetControls = styled.div`
   gap: 10px;
 `;
 
-const Button = styled(motion.button)<{ primary?: boolean; spinning?: boolean }>`
-  padding: ${props => props.primary ? '15px 40px' : '10px 15px'};
-  font-size: ${props => props.primary ? '1.5rem' : '1rem'};
+const Button = styled(motion.button)<{ $primary?: boolean; $spinning?: boolean }>`
+  padding: ${props => props.$primary ? '15px 40px' : '10px 15px'};
+  font-size: ${props => props.$primary ? '1.5rem' : '1rem'};
   background: ${props => {
-    if (props.primary) {
-      return props.spinning 
+    if (props.$primary) {
+      return props.$spinning 
         ? 'linear-gradient(45deg, #FFA500 0%, #FFD700 50%, #FFA500 100%)' 
         : 'linear-gradient(45deg, #FFD700 0%, #FFA500 100%)';
     }
     return 'linear-gradient(45deg, #333 0%, #666 100%)';
   }};
-  color: ${props => props.primary ? 'black' : 'white'};
+  color: ${props => props.$primary ? 'black' : 'white'};
   border: none;
   border-radius: 10px;
   cursor: pointer;
   font-weight: bold;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
   text-transform: uppercase;
-  flex: ${props => props.primary ? '1' : 'none'};
-  background-size: ${props => props.spinning ? '200% 200%' : '100% 100%'};
-  animation: ${props => props.spinning ? 'shimmer 2s infinite linear' : 'none'};
+  flex: ${props => props.$primary ? '1' : 'none'};
+  background-size: ${props => props.$spinning ? '200% 200%' : '100% 100%'};
+  animation: ${props => props.$spinning ? 'shimmer 2s infinite linear' : 'none'};
   
   @keyframes shimmer {
     0% {
@@ -91,8 +91,8 @@ const Controls: React.FC<ControlsProps> = ({ onSpin, onBetChange, spinning, bet 
       </BetControls>
       
       <Button
-        primary
-        spinning={spinning}
+        $primary
+        $spinning={spinning}
         onClick={onSpin}
         disabled={spinning}
         whileHover={{ scale: 1.05 }}
