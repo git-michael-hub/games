@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import styled from 'styled-components';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // Define todo item structure
 interface TodoItem {
@@ -206,28 +206,30 @@ const Todo: React.FC<TodoProps> = ({ initialTodos = [] }) => {
       </TodoForm>
       
       <TodoList>
-        {todos.map(todo => (
-          <TodoItemContainer 
-            key={todo.id}
-            variants={itemVariants}
-            initial="hidden"
-            animate="visible"
-            exit="removed"
-            layout
-          >
-            <Checkbox 
-              type="checkbox" 
-              checked={todo.completed}
-              onChange={() => toggleTodo(todo.id)}
-            />
-            <TodoText $completed={todo.completed}>
-              {todo.text}
-            </TodoText>
-            <DeleteButton onClick={() => deleteTodo(todo.id)}>
-              Delete
-            </DeleteButton>
-          </TodoItemContainer>
-        ))}
+        <AnimatePresence mode="popLayout">
+          {todos.map(todo => (
+            <TodoItemContainer 
+              key={todo.id}
+              variants={itemVariants}
+              initial="hidden"
+              animate="visible"
+              exit="removed"
+              layout
+            >
+              <Checkbox 
+                type="checkbox" 
+                checked={todo.completed}
+                onChange={() => toggleTodo(todo.id)}
+              />
+              <TodoText $completed={todo.completed}>
+                {todo.text}
+              </TodoText>
+              <DeleteButton onClick={() => deleteTodo(todo.id)}>
+                Delete
+              </DeleteButton>
+            </TodoItemContainer>
+          ))}
+        </AnimatePresence>
       </TodoList>
       
       {todos.length > 0 && (

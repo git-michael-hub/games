@@ -1,83 +1,99 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import { BrowserRouter as Router, Routes, Route, NavLink } from 'react-router-dom';
 import SlotMachine from './components/SlotMachine';
 import Chess from './components/Chess';
 import Todo from './components/Todo';
+import BlackJack from './components/BlackJack';
+import Bingo from './components/Bingo';
+import Lotto from './components/Lotto';
+import SnakeLadder from './components/SnakeLadder';
+import TicTacToe from './components/TicTacToe';
 
 const AppContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #1f1c2c 0%, #928dab 100%);
+  background: #282c34;
   color: white;
-  font-family: 'Arial', sans-serif;
   padding: 20px;
+  position: relative;
+  justify-content: center;
+`;
+
+const Navigation = styled.div`
+  display: flex;
+  gap: 15px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+`;
+
+const NavLinkStyled = styled(NavLink)`
+  padding: 10px 15px;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  text-decoration: none;
+  border-radius: 25px;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+  
+  &.active {
+    background: linear-gradient(45deg, #ff4d4d, #f9cb28);
+    box-shadow: 0 0 15px rgba(255, 77, 77, 0.5);
+  }
 `;
 
 const Title = styled.h1`
   font-size: 3rem;
-  margin-bottom: 1rem;
-  text-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
-  color: gold;
-`;
-
-const TabContainer = styled.div`
-  display: flex;
-  margin-bottom: 2rem;
-  gap: 10px;
-`;
-
-const Tab = styled.button<{ $active: boolean }>`
-  padding: 10px 20px;
-  background: ${props => props.$active ? 
-    'linear-gradient(45deg, #FFD700 0%, #FFA500 100%)' : 
-    'linear-gradient(45deg, #333 0%, #666 100%)'};
-  color: ${props => props.$active ? 'black' : 'white'};
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-weight: bold;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-  transition: all 0.3s ease;
-  
-  &:hover {
-    transform: translateY(-2px);
-  }
+  margin-bottom: 20px;
+  background: linear-gradient(to right, #ff4d4d, #f9cb28);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 2px 10px rgba(255, 77, 77, 0.3);
 `;
 
 const GameContainer = styled.div`
   width: 100%;
-  display: flex;
-  justify-content: center;
+  max-width: 1200px;
 `;
 
 const App: React.FC = () => {
-  const [activeGame, setActiveGame] = useState<'slots' | 'horserace' | 'carrace' | 'chess' | 'todo'>('slots');
-  
   return (
-    <AppContainer>
-      <Title>Vegas Games</Title>
-      
-      <TabContainer>
-        <Tab $active={activeGame === 'slots'} onClick={() => setActiveGame('slots')}>
-          Slot Machine
-        </Tab>
-        <Tab $active={activeGame === 'chess'} onClick={() => setActiveGame('chess')}>
-          Chess
-        </Tab>
-        <Tab $active={activeGame === 'todo'} onClick={() => setActiveGame('todo')}>
-          Todo List
-        </Tab>
-      </TabContainer>
-      
-      <GameContainer>
-        {activeGame === 'slots' && <SlotMachine />}
-        {activeGame === 'chess' && <Chess />}
-        {activeGame === 'todo' && <Todo />}
-      </GameContainer>
-    </AppContainer>
+    <Router>
+      <AppContainer>
+        <Title>Vegas Games</Title>
+        
+        <GameContainer>
+          <Routes>
+            <Route path="/" element={<SlotMachine />} />
+            <Route path="/chess" element={<Chess />} />
+            <Route path="/todo" element={<Todo />} />
+            <Route path="/blackjack" element={<BlackJack />} />
+            <Route path="/bingo" element={<Bingo />} />
+            <Route path="/lotto" element={<Lotto />} />
+            <Route path="/snakes-and-ladders" element={<SnakeLadder />} />
+            <Route path="/tic-tac-toe" element={<TicTacToe />} />
+          </Routes>
+        </GameContainer>
+        
+        <Navigation>
+          <NavLinkStyled to="/">Slot Machine</NavLinkStyled>
+          <NavLinkStyled to="/chess">Chess</NavLinkStyled>
+          <NavLinkStyled to="/todo">Todo</NavLinkStyled>
+          <NavLinkStyled to="/blackjack">Blackjack</NavLinkStyled>
+          <NavLinkStyled to="/bingo">Bingo</NavLinkStyled>
+          <NavLinkStyled to="/lotto">Lotto</NavLinkStyled>
+          <NavLinkStyled to="/snakes-and-ladders">Snakes & Ladders</NavLinkStyled>
+          <NavLinkStyled to="/tic-tac-toe">Tic Tac Toe</NavLinkStyled>
+        </Navigation>
+      </AppContainer>
+    </Router>
   );
 };
 

@@ -17,6 +17,7 @@ const SlotMachineContainer = styled.div`
   border: 5px solid gold;
   max-width: 600px;
   width: 100%;
+  margin: 0 auto;
 `;
 
 const ReelsContainer = styled.div`
