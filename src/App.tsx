@@ -10,6 +10,7 @@ import Lotto from './components/Lotto';
 import SnakeLadder from './components/SnakeLadder';
 import TicTacToe from './components/TicTacToe';
 import WheelOfFortune from './components/WheelOfFortune';
+import Game2048 from './components/Game2048';
 
 const AppContainer = styled.div`
   display: flex;
@@ -81,6 +82,7 @@ const App: React.FC = () => {
             <Route path="/snakes-and-ladders" element={<SnakeLadder />} />
             <Route path="/tic-tac-toe" element={<TicTacToe />} />
             <Route path="/wheel-of-fortune" element={<WheelOfFortune />} />
+            <Route path="/2048" element={<Game2048 />} />
           </Routes>
         </GameContainer>
         
@@ -94,6 +96,7 @@ const App: React.FC = () => {
           <NavLinkStyled to="/snakes-and-ladders">Snakes & Ladders</NavLinkStyled>
           <NavLinkStyled to="/tic-tac-toe">Tic Tac Toe</NavLinkStyled>
           <NavLinkStyled to="/wheel-of-fortune">Wheel of Fortune</NavLinkStyled>
+          <NavLinkStyled to="/2048">2048</NavLinkStyled>
         </Navigation>
       </AppContainer>
     </Router>
