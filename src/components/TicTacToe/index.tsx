@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 // Types
 type Player = 'X' | 'O';
 type CellValue = Player | null;
-type GameState = 'betting' | 'playing' | 'finished';
+type GameState = 'playing' | 'finished';
 type WinnerType = Player | 'draw' | null;
 
 // Styled Components
@@ -179,140 +179,6 @@ const ActionButton = styled(motion.button)`
   box-shadow: 0 5px 15px rgba(255, 77, 77, 0.5);
 `;
 
-const BettingContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin: 20px 0;
-  padding: 20px;
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 12px;
-`;
-
-const BettingSlider = styled.input`
-  width: 80%;
-  margin: 10px 0;
-  -webkit-appearance: none;
-  height: 10px;
-  border-radius: 5px;
-  background: linear-gradient(to right, #4e54c8, #ff4d4d);
-  outline: none;
-  
-  &::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 25px;
-    height: 25px;
-    border-radius: 50%;
-    background: gold;
-    cursor: pointer;
-    box-shadow: 0 0 10px gold;
-  }
-`;
-
-const ChipContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin: 10px 0;
-`;
-
-const Chip = styled(motion.div)<{ $value: number }>`
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-weight: bold;
-  cursor: pointer;
-  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.3);
-  background: ${props => {
-    switch(props.$value) {
-      case 5: return '#ff4d4d';
-      case 10: return '#4e54c8';
-      case 25: return '#4caf50';
-      case 50: return '#ff9800';
-      case 100: return '#9c27b0';
-      default: return '#777';
-    }
-  }};
-  border: 4px dashed rgba(255, 255, 255, 0.5);
-  color: white;
-  font-size: 1.2rem;
-  
-  &:before {
-    content: "";
-    position: absolute;
-    width: 90%;
-    height: 90%;
-    border-radius: 50%;
-    border: 2px dashed rgba(255, 255, 255, 0.3);
-  }
-`;
-
-const BetAmount = styled.div`
-  font-size: 2rem;
-  color: gold;
-  margin: 10px 0;
-  text-shadow: 0 0 10px gold;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-`;
-
-const NeonSign = styled(motion.div)`
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  color: #ff00ff;
-  font-size: 1.2rem;
-  font-style: italic;
-  font-weight: bold;
-  text-shadow: 
-    0 0 5px #ff00ff,
-    0 0 10px #ff00ff,
-    0 0 15px #ff00ff,
-    0 0 20px #ff00ff;
-  z-index: 5;
-`;
-
-const CoinStack = styled.div`
-  display: flex;
-  gap: 5px;
-  align-items: center;
-`;
-
-const Coin = styled(motion.div)`
-  width: 25px;
-  height: 25px;
-  background: gold;
-  border-radius: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 0.8rem;
-  font-weight: bold;
-  color: #333;
-  box-shadow: 0 0 5px gold;
-`;
-
-const PlayerBalance = styled.div`
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 20px;
-  padding: 0 20px;
-`;
-
-const Balance = styled.div<{ $player: Player }>`
-  color: ${props => props.$player === 'X' ? '#ff4d4d' : '#4e54c8'};
-  font-size: 1.2rem;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-`;
-
 // Main Component
 const TicTacToe: React.FC = () => {
   // State
@@ -320,15 +186,7 @@ const TicTacToe: React.FC = () => {
   const [currentPlayer, setCurrentPlayer] = useState<Player>('X');
   const [winner, setWinner] = useState<WinnerType>(null);
   const [winLine, setWinLine] = useState<{orientation: string; position: number} | null>(null);
-  const [gameState, setGameState] = useState<GameState>('betting');
-  const [betAmount, setBetAmount] = useState<number>(0);
-  const [playerXBalance, setPlayerXBalance] = useState<number>(1000);
-  const [playerOBalance, setPlayerOBalance] = useState<number>(1000);
-  const [playerXBet, setPlayerXBet] = useState<number>(0);
-  const [playerOBet, setPlayerOBet] = useState<number>(0);
-  
-  // Chip values
-  const chipValues = [5, 10, 25, 50, 100];
+  const [gameState, setGameState] = useState<GameState>('playing');
   
   // Add useEffect to log state changes
   useEffect(() => {
@@ -339,7 +197,7 @@ const TicTacToe: React.FC = () => {
   
   // Handle cell click
   const handleCellClick = (index: number) => {
-    // If cell is already marked or game is over or not in playing state, do nothing
+    // If cell is already marked or game is over, do nothing
     if (board[index] !== null || gameState !== 'playing') {
       console.log("Cell click ignored: ", { 
         cellValue: board[index], 
@@ -363,7 +221,6 @@ const TicTacToe: React.FC = () => {
       setWinner(gameWinner.winner);
       setWinLine(gameWinner.line);
       setGameState('finished');
-      handleGameEnd(gameWinner.winner);
       return;
     }
     
@@ -372,7 +229,6 @@ const TicTacToe: React.FC = () => {
       console.log("Game ended in draw");
       setWinner('draw');
       setGameState('finished');
-      handleGameEnd('draw');
       return;
     }
     
@@ -419,72 +275,13 @@ const TicTacToe: React.FC = () => {
     return null;
   };
   
-  // Handle game end and distribute bets
-  const handleGameEnd = (result: WinnerType) => {
-    if (result === 'X') {
-      // X wins, gets both bets
-      setPlayerXBalance(prevBalance => prevBalance + playerXBet + playerOBet);
-    } else if (result === 'O') {
-      // O wins, gets both bets
-      setPlayerOBalance(prevBalance => prevBalance + playerXBet + playerOBet);
-    } else {
-      // Draw, return bets
-      setPlayerXBalance(prevBalance => prevBalance + playerXBet);
-      setPlayerOBalance(prevBalance => prevBalance + playerOBet);
-    }
-  };
-  
   // Start a new game
   const startNewGame = () => {
     setBoard(Array(9).fill(null));
     setCurrentPlayer('X');
     setWinner(null);
     setWinLine(null);
-    setGameState('betting');
-    setPlayerXBet(0);
-    setPlayerOBet(0);
-    setBetAmount(0);
-  };
-  
-  // Place a bet
-  const placeBet = () => {
-    if (betAmount <= 0) return; // Don't allow zero or negative bets
-    
-    if (currentPlayer === 'X') {
-      if (betAmount > playerXBalance) return;
-      setPlayerXBalance(prevBalance => prevBalance - betAmount);
-      setPlayerXBet(betAmount);
-      setCurrentPlayer('O');
-    } else {
-      if (betAmount > playerOBalance) return;
-      setPlayerOBalance(prevBalance => prevBalance - betAmount);
-      setPlayerOBet(betAmount);
-      setGameState('playing');
-      setCurrentPlayer('X'); // X always starts the game
-    }
-    
-    // Reset bet amount for the next player
-    setBetAmount(0);
-  };
-  
-  // Handle chip selection with better visual feedback
-  const addChip = (value: number) => {
-    console.log(`Adding chip value: ${value}`);
-    const maxBet = currentPlayer === 'X' 
-      ? Math.min(playerXBalance, 500) 
-      : Math.min(playerOBalance, 500);
-      
-    setBetAmount(prev => {
-      const newValue = Math.min(prev + value, maxBet);
-      console.log(`Bet amount updated: ${prev} -> ${newValue}`);
-      return newValue;
-    });
-  };
-  
-  // Handle bet slider change
-  const handleBetSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(e.target.value);
-    setBetAmount(value);
+    setGameState('playing');
   };
   
   return (
@@ -500,81 +297,6 @@ const TicTacToe: React.FC = () => {
           </PlayerInfo>
         </div>
       </GameHeader>
-      
-      <PlayerBalance>
-        <Balance $player="X">
-          <Coin>X</Coin>
-          {playerXBalance}
-        </Balance>
-        <Balance $player="O">
-          <Coin>O</Coin>
-          {playerOBalance}
-        </Balance>
-      </PlayerBalance>
-      
-      {gameState === 'betting' && (
-        <BettingContainer>
-          <h3>
-            Player {currentPlayer} Place Your Bet
-          </h3>
-          <BetAmount>
-            <motion.span
-              animate={{ scale: [1, 1.1, 1] }}
-              transition={{ duration: 1, repeat: Infinity }}
-            >
-              ${betAmount}
-            </motion.span>
-          </BetAmount>
-          
-          <ChipContainer>
-            {chipValues.map(value => (
-              <Chip 
-                key={value} 
-                $value={value}
-                onClick={() => {
-                  console.log(`Clicking chip: $${value}`);
-                  addChip(value);
-                }}
-                whileHover={{ scale: 1.1, rotate: 10 }}
-                whileTap={{ scale: 0.9 }}
-              >
-                ${value}
-              </Chip>
-            ))}
-          </ChipContainer>
-          
-          <BettingSlider 
-            type="range" 
-            min="0" 
-            max={currentPlayer === 'X' ? playerXBalance : playerOBalance} 
-            value={betAmount}
-            onChange={handleBetSliderChange}
-          />
-          
-          <ActionButton
-            onClick={() => {
-              console.log("Place bet button clicked");
-              placeBet();
-            }}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            animate={{ 
-              y: [0, -5, 0],
-              boxShadow: [
-                '0 5px 15px rgba(255, 77, 77, 0.5)',
-                '0 8px 20px rgba(255, 77, 77, 0.7)',
-                '0 5px 15px rgba(255, 77, 77, 0.5)'
-              ]
-            }}
-            transition={{ 
-              y: { repeat: Infinity, duration: 1.5 },
-              boxShadow: { repeat: Infinity, duration: 1.5 }
-            }}
-          >
-            Place Bet
-          </ActionButton>
-        </BettingContainer>
-      )}
       
       <Board>
         {board.map((cell, index) => (
@@ -634,29 +356,9 @@ const TicTacToe: React.FC = () => {
         transition={{ y: { repeat: Infinity, duration: 2 } }}
       >
         {gameState === 'playing' && !winner && `Current Turn: Player ${currentPlayer}`}
-        {gameState === 'betting' && `Place your bets!`}
         {winner === 'draw' && 'Game ended in a Draw!'}
         {winner && winner !== 'draw' && `Player ${winner} Wins!`}
       </GameStatus>
-      
-      {/* Vegas Neon Sign */}
-      <NeonSign
-        animate={{ 
-          opacity: [1, 0.7, 1],
-          textShadow: [
-            '0 0 5px #ff00ff, 0 0 10px #ff00ff, 0 0 15px #ff00ff, 0 0 20px #ff00ff',
-            '0 0 2px #ff00ff, 0 0 5px #ff00ff, 0 0 10px #ff00ff, 0 0 15px #ff00ff',
-            '0 0 5px #ff00ff, 0 0 10px #ff00ff, 0 0 15px #ff00ff, 0 0 20px #ff00ff'
-          ]
-        }}
-        transition={{ 
-          duration: 1.5,
-          repeat: Infinity,
-          repeatType: 'reverse'
-        }}
-      >
-        Vegas Jackpot!
-      </NeonSign>
       
       {/* Game Finished Overlay */}
       <AnimatePresence>
@@ -700,27 +402,6 @@ const TicTacToe: React.FC = () => {
             >
               {winner === 'draw' ? 'Draw!' : `Player ${winner} Wins!`}
             </GameMessage>
-            
-            {winner !== 'draw' && (
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: [1, 1.1, 1] }}
-                transition={{ delay: 0.5, duration: 0.5 }}
-              >
-                <CoinStack>
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Coin
-                      key={i}
-                      initial={{ y: -50, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      transition={{ delay: 0.7 + i * 0.1 }}
-                    >
-                      $
-                    </Coin>
-                  ))}
-                </CoinStack>
-              </motion.div>
-            )}
             
             <ActionButton
               onClick={startNewGame}
