@@ -11,7 +11,6 @@ type Prize = {
   value: number;
   label: string;
   color: string;
-  probability: number;
 };
 
 // Styled components
@@ -125,42 +124,21 @@ const NeonSign = styled(motion.div)`
   z-index: 5;
 `;
 
-// Define wheel segments
-const PRIZES: Prize[] = [
-  { id: 1, value: 100, label: '$100', color: '#ff4d4d', probability: 5 },
-  { id: 2, value: 200, label: '$200', color: '#4e54c8', probability: 5 },
-  { id: 3, value: 50, label: '$50', color: '#4ecdc4', probability: 10 },
-  { id: 4, value: 500, label: '$500', color: '#ffba08', probability: 2 },
-  { id: 5, value: -1, label: 'LOSE', color: '#595959', probability: 15 },
-  { id: 6, value: 75, label: '$75', color: '#ff9f43', probability: 10 },
-  { id: 7, value: 250, label: '$250', color: '#f900bf', probability: 5 },
-  { id: 8, value: 25, label: '$25', color: '#6c63ff', probability: 15 },
-  { id: 9, value: 1000, label: '$1000', color: '#ff00ff', probability: 1 },
-  { id: 10, value: 150, label: '$150', color: '#00bd56', probability: 5 },
-  { id: 11, value: 10, label: '$10', color: '#ff6b6b', probability: 20 },
-  { id: 12, value: 300, label: '$300', color: '#2ecc71', probability: 3 }
+// Define wheel segments - MUST BE 12 SEGMENTS
+const WHEEL_SEGMENTS: Prize[] = [
+  { id: 0, value: 100, label: '$100', color: '#ff4d4d' },
+  { id: 1, value: 200, label: '$200', color: '#4e54c8' },
+  { id: 2, value: 50, label: '$50', color: '#4ecdc4' },
+  { id: 3, value: 500, label: '$500', color: '#ffba08' },
+  { id: 4, value: 0, label: 'LOSE', color: '#595959' },
+  { id: 5, value: 75, label: '$75', color: '#ff9f43' },
+  { id: 6, value: 250, label: '$250', color: '#f900bf' },
+  { id: 7, value: 25, label: '$25', color: '#6c63ff' },
+  { id: 8, value: 1000, label: '$1000', color: '#ff00ff' },
+  { id: 9, value: 150, label: '$150', color: '#00bd56' },
+  { id: 10, value: 10, label: '$10', color: '#ff6b6b' },
+  { id: 11, value: 300, label: '$300', color: '#2ecc71' }
 ];
-
-// Calculate segments
-const calculateSegmentDegree = () => {
-  return 360 / PRIZES.length;
-};
-
-// Create a weighted random function to select a prize
-const selectWeightedPrize = () => {
-  const totalProbability = PRIZES.reduce((sum, prize) => sum + prize.probability, 0);
-  let random = Math.floor(Math.random() * totalProbability);
-  
-  for (const prize of PRIZES) {
-    random -= prize.probability;
-    if (random < 0) {
-      return prize;
-    }
-  }
-  
-  // Fallback
-  return PRIZES[0];
-};
 
 // Sound creation
 const createSpinSound = () => {
@@ -180,11 +158,8 @@ const WheelOfFortune: React.FC = () => {
   // Game state
   const [gameState, setGameState] = useState<GameState>('idle');
   const [rotationDegrees, setRotationDegrees] = useState(0);
-  const [prize, setPrize] = useState<Prize | null>(null);
-  const [balance, setBalance] = useState(1000);
-  const [totalWinnings, setTotalWinnings] = useState(0);
-  const [betAmount, setBetAmount] = useState(50);
-  const [isFirstSpin, setIsFirstSpin] = useState(true);
+  const [selectedSegment, setSelectedSegment] = useState<Prize | null>(null);
+  const [score, setScore] = useState(0);
   
   // Audio refs
   const spinSoundRef = useRef<HTMLAudioElement | null>(null);
@@ -207,90 +182,60 @@ const WheelOfFortune: React.FC = () => {
     };
   }, []);
   
-  // Handle spinning animation
-  const spinWheel = () => {
-    // Check if player has enough balance
-    if (balance < betAmount) {
-      alert('Not enough credits to place bet!');
-      return;
-    }
-    
-    // Deduct bet from balance
-    setBalance(prev => prev - betAmount);
-    
-    // Set to spinning state
+  // Handle spin button click
+  const handleSpin = () => {
+    // Set game state to spinning
     setGameState('spinning');
     
-    // Play spin sound
+    // Play spinning sound
     if (spinSoundRef.current) {
       spinSoundRef.current.currentTime = 0;
       spinSoundRef.current.play().catch(e => console.error("Error playing spin sound:", e));
     }
     
-    // Determine the winning prize
-    const selectedPrize = selectWeightedPrize();
-    setPrize(selectedPrize);
+    // Randomly select a segment (0-11)
+    const selectedIndex = Math.floor(Math.random() * WHEEL_SEGMENTS.length);
+    const segment = WHEEL_SEGMENTS[selectedIndex];
     
-    // Calculate the stopping position
-    const segmentDegree = calculateSegmentDegree();
-    const prizeIndex = PRIZES.findIndex(p => p.id === selectedPrize.id);
+    // Store the selected segment
+    setSelectedSegment(segment);
     
-    // Make sure the LOSE segment is properly identified
-    console.log('Selected prize index:', prizeIndex, 'Prize:', selectedPrize.label, 'Value:', selectedPrize.value);
+    // Calculate rotation
+    // Each segment is 30 degrees (360 / 12)
+    // We want the selected segment to stop at the top (indicator position)
+    // Adding 5 full rotations (1800 degrees) for effect
+    const rotationAmount = 1800 + (360 - (selectedIndex * 30) - 15);
     
-    const baseRotation = 1800; // 5 full rotations 
+    // Set the rotation
+    setRotationDegrees(rotationAmount);
     
-    // Add a random offset so it doesn't always point to the exact middle
-    const randomOffset = Math.random() * (segmentDegree * 0.7) - (segmentDegree * 0.35);
-    const targetRotation = baseRotation + (360 - ((prizeIndex * segmentDegree) + randomOffset));
-    
-    // Animate the wheel
-    setRotationDegrees(targetRotation);
-    
-    // Determine spin duration based on whether it's the first spin
-    const spinDuration = isFirstSpin ? 8000 : 3000;
-    
-    // Show result after spinning
+    // Set a timeout to show the result
     setTimeout(() => {
-      setGameState('result');
-      
-      // Play win sound if it's a win (value > 0)
-      if (selectedPrize.value > 0 && winSoundRef.current) {
-        winSoundRef.current.play().catch(e => console.error("Error playing win sound:", e));
-      }
-      
-      // If it's a win, add to balance
-      if (selectedPrize.value > 0) {
-        const winnings = selectedPrize.value * (betAmount / 50); // Scale winnings based on bet
-        setBalance(prev => prev + winnings);
-        setTotalWinnings(prev => prev + winnings);
-      }
-      
-      // Stop spin sound
+      // Stop the spinning sound
       if (spinSoundRef.current) {
         spinSoundRef.current.pause();
         spinSoundRef.current.currentTime = 0;
       }
       
-      // Set isFirstSpin to false after the first spin
-      if (isFirstSpin) {
-        setIsFirstSpin(false);
+      // Set game state to result
+      setGameState('result');
+      
+      // Check if player won
+      if (segment.value > 0) {
+        // Play win sound
+        if (winSoundRef.current) {
+          winSoundRef.current.play().catch(e => console.error("Error playing win sound:", e));
+        }
+        
+        // Add to score
+        setScore(prevScore => prevScore + segment.value);
       }
-    }, spinDuration);
+    }, 6000); // 6 seconds
   };
   
-  // Reset for new game
-  const resetGame = () => {
+  // Handle play again button click
+  const handlePlayAgain = () => {
     setGameState('idle');
-    setPrize(null);
-  };
-  
-  // Handle bet amount changes
-  const handleBetChange = (amount: number) => {
-    if (gameState !== 'idle') return;
-    
-    const newBet = Math.max(10, Math.min(500, betAmount + amount));
-    setBetAmount(newBet);
   };
   
   return (
@@ -299,16 +244,8 @@ const WheelOfFortune: React.FC = () => {
         <GameTitle>Wheel of Fortune</GameTitle>
         <StatsContainer>
           <Stat>
-            <span>CREDITS</span>
-            <span>{balance}</span>
-          </Stat>
-          <Stat>
-            <span>BET</span>
-            <span>{betAmount}</span>
-          </Stat>
-          <Stat>
-            <span>WINNINGS</span>
-            <span>{totalWinnings}</span>
+            <span>SCORE</span>
+            <span>{score}</span>
           </Stat>
         </StatsContainer>
       </GameHeader>
@@ -316,24 +253,29 @@ const WheelOfFortune: React.FC = () => {
       <WheelContainer>
         <WheelIndicator />
         <Wheel 
-          segments={PRIZES}
+          segments={WHEEL_SEGMENTS}
           rotation={rotationDegrees}
           isSpinning={gameState === 'spinning'}
-          isFirstSpin={isFirstSpin}
         />
         
         {/* Result message overlay */}
         <AnimatePresence>
-          {gameState === 'result' && prize && (
+          {gameState === 'result' && selectedSegment && (
             <ResultMessage
               initial={{ opacity: 0, scale: 0.5 }}
               animate={{
                 opacity: 1,
                 scale: [1, 1.1, 1],
                 boxShadow: [
-                  prize.value > 0 ? '0 0 20px rgba(255, 215, 0, 0.7)' : '0 0 20px rgba(255, 0, 0, 0.7)',
-                  prize.value > 0 ? '0 0 10px rgba(255, 215, 0, 0.3)' : '0 0 10px rgba(255, 0, 0, 0.3)',
-                  prize.value > 0 ? '0 0 20px rgba(255, 215, 0, 0.7)' : '0 0 20px rgba(255, 0, 0, 0.7)'
+                  selectedSegment.value > 0 
+                    ? '0 0 20px rgba(255, 215, 0, 0.7)' 
+                    : '0 0 20px rgba(255, 0, 0, 0.7)',
+                  selectedSegment.value > 0 
+                    ? '0 0 10px rgba(255, 215, 0, 0.3)' 
+                    : '0 0 10px rgba(255, 0, 0, 0.3)',
+                  selectedSegment.value > 0 
+                    ? '0 0 20px rgba(255, 215, 0, 0.7)' 
+                    : '0 0 20px rgba(255, 0, 0, 0.7)'
                 ]
               }}
               exit={{ opacity: 0, scale: 0.5 }}
@@ -342,22 +284,22 @@ const WheelOfFortune: React.FC = () => {
                 boxShadow: { repeat: Infinity, duration: 1.5 }
               }}
               style={{
-                color: prize.value > 0 ? 'gold' : '#ff4d4d', // Red color for lose message
-                borderColor: prize.value > 0 ? 'gold' : '#ff4d4d' // Red border for lose message
+                color: selectedSegment.value > 0 ? 'gold' : '#ff4d4d',
+                borderColor: selectedSegment.value > 0 ? 'gold' : '#ff4d4d'
               }}
             >
-              {prize.value > 0 ? `You Win ${prize.label}!` : 'You Lose!'}
+              {selectedSegment.value > 0 
+                ? `You Win ${selectedSegment.value} Points!` 
+                : 'You Lose!'}
             </ResultMessage>
           )}
         </AnimatePresence>
       </WheelContainer>
       
       <Controls 
-        onSpin={spinWheel}
-        onPlayAgain={resetGame}
-        onChangeBet={handleBetChange}
+        onSpin={handleSpin}
+        onPlayAgain={handlePlayAgain}
         gameState={gameState}
-        betAmount={betAmount}
       />
       
       {/* Vegas neon sign */}
@@ -382,4 +324,4 @@ const WheelOfFortune: React.FC = () => {
   );
 };
 
-export default WheelOfFortune; 
+export default WheelOfFortune;

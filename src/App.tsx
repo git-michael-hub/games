@@ -118,7 +118,7 @@ const App: React.FC = () => {
               <NavLinkStyled to="/lotto">Lotto</NavLinkStyled>
               <NavLinkStyled to="/snakes-and-ladders">Snakes & Ladders</NavLinkStyled>
               <NavLinkStyled to="/tic-tac-toe">Tic Tac Toe</NavLinkStyled>
-              <NavLinkStyled to="/wheel-of-fortune">Wheel of Fortune</NavLinkStyled>
+              {/* <NavLinkStyled to="/wheel-of-fortune">Wheel of Fortune</NavLinkStyled> */}
             </GameLinks>
           </CategoryContainer>
           

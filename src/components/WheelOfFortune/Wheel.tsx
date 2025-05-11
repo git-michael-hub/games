@@ -8,14 +8,12 @@ type Prize = {
   value: number;
   label: string;
   color: string;
-  probability: number;
 };
 
 interface WheelProps {
   segments: Prize[];
   rotation: number;
   isSpinning: boolean;
-  isFirstSpin: boolean;
 }
 
 // Styled components
@@ -53,7 +51,7 @@ const degreesToRadians = (degrees: number) => {
   return degrees * Math.PI / 180;
 };
 
-const Wheel: React.FC<WheelProps> = ({ segments, rotation, isSpinning, isFirstSpin }) => {
+const Wheel: React.FC<WheelProps> = ({ segments, rotation, isSpinning }) => {
   const numSegments = segments.length;
   const segmentAngle = 360 / numSegments;
   const radius = 200; // SVG radius
@@ -123,7 +121,7 @@ const Wheel: React.FC<WheelProps> = ({ segments, rotation, isSpinning, isFirstSp
         rotate: rotation,
         transition: {
           type: "spring",
-          duration: isFirstSpin ? 8 : 3,
+          duration: 6, // Fixed duration of 6 seconds for all spins
           bounce: 0.25
         }
       }}
