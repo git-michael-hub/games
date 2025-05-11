@@ -12,6 +12,7 @@ import TicTacToe from './components/TicTacToe';
 import WheelOfFortune from './components/WheelOfFortune';
 import Game2048 from './components/Game2048';
 import TypingTest from './components/TypingTest';
+import AngryBird from './components/AngryBird';
 
 const AppContainer = styled.div`
   display: flex;
@@ -125,6 +126,7 @@ const App: React.FC = () => {
             <GameLinks>
               <NavLinkStyled to="/2048">2048</NavLinkStyled>
               <NavLinkStyled to="/typing-test">Typing Test</NavLinkStyled>
+              <NavLinkStyled to="/angry-bird">Angry Bird</NavLinkStyled>
             </GameLinks>
           </CategoryContainer>
         </Sidebar>
@@ -145,6 +147,7 @@ const App: React.FC = () => {
               <Route path="/wheel-of-fortune" element={<WheelOfFortune />} />
               <Route path="/2048" element={<Game2048 />} />
               <Route path="/typing-test" element={<TypingTest />} />
+              <Route path="/angry-bird" element={<AngryBird />} />
             </Routes>
           </GameContainer>
         </MainContent>
