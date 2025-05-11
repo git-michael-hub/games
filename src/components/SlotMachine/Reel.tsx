@@ -26,17 +26,17 @@ const ReelStrip = styled(motion.div)`
   width: 100%;
 `;
 
-const Symbol = styled(motion.div)<{ fixed?: boolean }>`
+const Symbol = styled(motion.div)<{ $fixed?: boolean }>`
   display: flex;
   align-items: center;
   justify-content: center;
   height: 80px;
   font-size: 3rem;
-  background: ${({ fixed }) => fixed ? 'linear-gradient(to bottom, #333, #000)' : 'transparent'};
+  background: ${({ $fixed }) => $fixed ? 'linear-gradient(to bottom, #333, #000)' : 'transparent'};
   padding: 10px;
   border-radius: 5px;
   margin: 2px;
-  box-shadow: ${({ fixed }) => fixed ? '0 0 10px rgba(255, 215, 0, 0.3)' : 'none'};
+  box-shadow: ${({ $fixed }) => $fixed ? '0 0 10px rgba(255, 215, 0, 0.3)' : 'none'};
 `;
 
 // Create a larger set of symbols for continuous animation
@@ -90,7 +90,7 @@ const Reel: React.FC<ReelProps> = ({ symbols, spinning, delay }) => {
         {extendedSymbols.map((symbol, index) => (
           <Symbol 
             key={index}
-            fixed={!spinning}
+            $fixed={!spinning}
           >
             {symbol}
           </Symbol>

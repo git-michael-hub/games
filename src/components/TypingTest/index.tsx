@@ -25,13 +25,13 @@ const Title = styled.h1`
 `;
 
 interface TimerDisplayProps {
-  isLow?: boolean;
+  $isLow?: boolean;
 }
 
 const TimerDisplay = styled.div<TimerDisplayProps>`
   font-size: 1.5rem;
   margin-bottom: 20px;
-  color: ${props => props.isLow ? '#ff4d4d' : '#fff'};
+  color: ${props => props.$isLow ? '#ff4d4d' : '#fff'};
   transition: color 0.3s;
 `;
 
@@ -87,18 +87,18 @@ const TimeOptions = styled.div`
   margin-bottom: 20px;
 `;
 
-const TimeButton = styled.button<{ isSelected: boolean }>`
+const TimeButton = styled.button<{ $isSelected: boolean }>`
   padding: 8px 16px;
-  background-color: ${props => props.isSelected ? '#4d8bff' : '#333'};
+  background-color: ${props => props.$isSelected ? '#4d8bff' : '#333'};
   color: white;
-  border: 1px solid ${props => props.isSelected ? '#4d8bff' : '#555'};
+  border: 1px solid ${props => props.$isSelected ? '#4d8bff' : '#555'};
   border-radius: 4px;
   font-size: 0.9rem;
   cursor: pointer;
   transition: all 0.2s;
   
   &:hover {
-    background-color: ${props => props.isSelected ? '#3a7aee' : '#444'};
+    background-color: ${props => props.$isSelected ? '#3a7aee' : '#444'};
   }
 `;
 
@@ -109,18 +109,18 @@ const CategorySelector = styled.div`
   margin-bottom: 20px;
 `;
 
-const CategoryButton = styled.button<{ isSelected: boolean }>`
+const CategoryButton = styled.button<{ $isSelected: boolean }>`
   padding: 10px 20px;
-  background-color: ${props => props.isSelected ? '#4d8bff' : '#333'};
+  background-color: ${props => props.$isSelected ? '#4d8bff' : '#333'};
   color: white;
-  border: 1px solid ${props => props.isSelected ? '#4d8bff' : '#555'};
+  border: 1px solid ${props => props.$isSelected ? '#4d8bff' : '#555'};
   border-radius: 4px;
   font-size: 1rem;
   cursor: pointer;
   transition: all 0.2s;
   
   &:hover {
-    background-color: ${props => props.isSelected ? '#3a7aee' : '#444'};
+    background-color: ${props => props.$isSelected ? '#3a7aee' : '#444'};
   }
 `;
 
@@ -315,19 +315,19 @@ const TypingTest: React.FC = () => {
         <>
           <CategorySelector>
             <CategoryButton 
-              isSelected={category === 'general'} 
+              $isSelected={category === 'general'} 
               onClick={() => handleCategoryChange('general')}
             >
               General
             </CategoryButton>
             <CategoryButton 
-              isSelected={category === 'atomicHabits'} 
+              $isSelected={category === 'atomicHabits'} 
               onClick={() => handleCategoryChange('atomicHabits')}
             >
               Atomic Habits
             </CategoryButton>
             <CategoryButton 
-              isSelected={category === 'sevenDeadlySins'} 
+              $isSelected={category === 'sevenDeadlySins'} 
               onClick={() => handleCategoryChange('sevenDeadlySins')}
             >
               Seven Deadly Sins
@@ -336,25 +336,25 @@ const TypingTest: React.FC = () => {
           
           <TimeOptions>
             <TimeButton 
-              isSelected={duration === 1} 
+              $isSelected={duration === 1} 
               onClick={() => handleDurationChange(1)}
             >
               1 Min
             </TimeButton>
             <TimeButton 
-              isSelected={duration === 3} 
+              $isSelected={duration === 3} 
               onClick={() => handleDurationChange(3)}
             >
               3 Min
             </TimeButton>
             <TimeButton 
-              isSelected={duration === 5} 
+              $isSelected={duration === 5} 
               onClick={() => handleDurationChange(5)}
             >
               5 Min
             </TimeButton>
             <TimeButton 
-              isSelected={duration === 10} 
+              $isSelected={duration === 10} 
               onClick={() => handleDurationChange(10)}
             >
               10 Min
@@ -363,7 +363,7 @@ const TypingTest: React.FC = () => {
         </>
       )}
       
-      <TimerDisplay isLow={timer < 60}>{formatTime(timer)}</TimerDisplay>
+      <TimerDisplay $isLow={timer < 60}>{formatTime(timer)}</TimerDisplay>
       
       {!isActive && !isFinished && (
         <ButtonContainer>
