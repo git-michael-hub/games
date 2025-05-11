@@ -1,0 +1,23 @@
+{
+  "version": 2,
+  "buildCommand": null,
+  "devCommand": null,
+  "outputDirectory": ".",
+  "public": true,
+  "cleanUrls": true,
+  "github": {
+    "enabled": true,
+    "silent": false
+  },
+  "headers": [
+    {
+        "source": "/:all*",
+        "headers": [
+        {
+            "key": "Cache-Control",
+            "value": "public,max-age=31536000,immutable"
+        }
+        ]
+    }
+    ]
+} 
