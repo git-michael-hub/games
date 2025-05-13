@@ -6,9 +6,9 @@ import { GRID_SIZE } from './gameLogic';
 const BoardContainer = styled.div`
   background: #bbada0;
   border-radius: 6px;
-  width: 500px;
-  height: 500px;
-  padding: 15px;
+  width: 100%;
+  height: 0;
+  padding-bottom: 100%; /* Square aspect ratio */
   position: relative;
   box-sizing: border-box;
 `;
@@ -18,8 +18,11 @@ const Grid = styled.div`
   grid-template-columns: repeat(4, 1fr);
   grid-template-rows: repeat(4, 1fr);
   grid-gap: 15px;
-  width: 100%;
-  height: 100%;
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  right: 15px;
+  bottom: 15px;
 `;
 
 const Cell = styled.div`
@@ -29,17 +32,18 @@ const Cell = styled.div`
   height: 100%;
 `;
 
-// Calculate cell size for consistent dimensions
-const CELL_SIZE_PX = 106.25; // (500px - 2*15px padding - 3*15px gaps) / 4
-
 interface BoardProps {
   board: number[][];
   newTile: { row: number; col: number; value: number } | null;
   mergedTiles: { row: number; col: number; value: number }[];
+  boardSize: number;
 }
 
-export const Board: React.FC<BoardProps> = ({ board, newTile, mergedTiles }) => {
+export const Board: React.FC<BoardProps> = ({ board, newTile, mergedTiles, boardSize }) => {
   const tiles = [];
+  
+  // Calculate cell size dynamically based on board size
+  const cellSize = (boardSize - 2 * 15 - 3 * 15) / GRID_SIZE;
   
   // Create array of tiles with position and value information
   for (let row = 0; row < GRID_SIZE; row++) {
@@ -64,7 +68,7 @@ export const Board: React.FC<BoardProps> = ({ board, newTile, mergedTiles }) => 
             col={col}
             isNew={isNew}
             hasMerged={isMerged}
-            cellSize={CELL_SIZE_PX}
+            cellSize={cellSize}
           />
         );
       }

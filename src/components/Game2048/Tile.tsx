@@ -28,10 +28,20 @@ const getTileColor = (value: number) => {
   return colors[value] || { bg: '#3c3a32', text: '#f9f6f2' };
 };
 
-const getFontSize = (value: number) => {
-  if (value < 100) return '55px';
-  if (value < 1000) return '45px';
-  return '35px';
+// Dynamic font size calculation based on cell size and value
+const getFontSize = (value: number, cellSize: number) => {
+  let baseSize = cellSize * 0.5; // 50% of cell size as base
+  
+  // Adjust based on number of digits
+  if (value >= 1000) {
+    baseSize *= 0.65; // 65% of base size for 4 digits
+  } else if (value >= 100) {
+    baseSize *= 0.75; // 75% of base size for 3 digits
+  } else if (value >= 10) {
+    baseSize *= 0.85; // 85% of base size for 2 digits
+  }
+  
+  return `${Math.max(16, Math.min(55, baseSize))}px`; // Min 16px, max 55px
 };
 
 // Animation for new tiles
@@ -90,6 +100,8 @@ const TileContainer = styled.div<{
       ? popAnimation 
       : 'none'} 200ms ease-in-out;
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+  -webkit-touch-callout: none; /* Prevent text selection on mobile */
+  user-select: none;
 `;
 
 export const Tile: React.FC<TileProps> = ({ 
@@ -101,7 +113,7 @@ export const Tile: React.FC<TileProps> = ({
   cellSize 
 }) => {
   const { bg, text } = getTileColor(value);
-  const fontSize = getFontSize(value);
+  const fontSize = getFontSize(value, cellSize);
 
   return (
     <TileContainer

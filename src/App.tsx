@@ -225,7 +225,7 @@ const App: React.FC = () => {
         </Sidebar>
         
         <MainContent>
-          <Title>Vegas Games</Title>
+          {/* <Title>Vegas Games</Title> */}
           
           <GameContainer>
             <Routes>

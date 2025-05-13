@@ -1,14 +1,38 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import styled from 'styled-components';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import styled, { createGlobalStyle } from 'styled-components';
 import { Board } from './Board';
 import { getEmptyBoard, addRandomTile, moveBoard, DIRECTIONS, canMove, hasWon } from './gameLogic';
+
+// Global styles to prevent scrolling
+const GlobalStyles = createGlobalStyle`
+  body, html {
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    touch-action: none;
+    margin: 0;
+    padding: 0;
+  }
+`;
 
 const GameContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 20px;
+  padding: 10px;
   font-family: 'Clear Sans', 'Helvetica Neue', Arial, sans-serif;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  height: 100vh;
+  max-height: 100vh;
+  overflow: hidden;
+  box-sizing: border-box;
+  
+  @media (max-width: 768px) {
+    padding: 8px;
+  }
 `;
 
 const Header = styled.div`
@@ -16,8 +40,14 @@ const Header = styled.div`
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  max-width: 500px;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
+  
+  @media (max-width: 500px) {
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 5px;
+  }
 `;
 
 const TitleArea = styled.div`
@@ -30,6 +60,14 @@ const Title = styled.h1`
   font-weight: bold;
   margin: 0;
   color: #776e65;
+  
+  @media (max-width: 768px) {
+    font-size: 50px;
+  }
+  
+  @media (max-width: 500px) {
+    font-size: 40px;
+  }
 `;
 
 const Description = styled.p`
@@ -71,6 +109,10 @@ const HeaderControls = styled.div`
   flex-direction: column;
   align-items: flex-end;
   gap: 10px;
+  
+  @media (max-width: 500px) {
+    align-items: center;
+  }
 `;
 
 const GameMessage = styled.div<{ $visible: boolean }>`
@@ -94,20 +136,78 @@ const GameMessageTitle = styled.p`
   font-weight: bold;
   margin: 0 0 20px;
   color: #776e65;
+  
+  @media (max-width: 768px) {
+    font-size: 48px;
+  }
+  
+  @media (max-width: 500px) {
+    font-size: 36px;
+  }
 `;
 
 const GameWrapper = styled.div`
   position: relative;
-  width: 500px;
-  height: 500px;
-  margin-bottom: 20px;
+  width: 100%;
+  margin-bottom: 10px;
+  flex: 1;
+  min-height: 0;
+  max-height: calc(100vh - 250px);
+  
+  @media (max-width: 768px) {
+    max-height: calc(100vh - 200px);
+  }
+  
+  @media (max-width: 500px) {
+    max-height: calc(100vh - 180px);
+    margin-bottom: 5px;
+  }
 `;
 
 const InstructionsContainer = styled.div`
-  margin-top: 20px;
+  margin-top: 10px;
   text-align: center;
   color: #776e65;
-  max-width: 500px;
+  width: 100%;
+  font-size: 0.9rem;
+  
+  @media (max-width: 768px) {
+    margin-top: 5px;
+    font-size: 0.8rem;
+  }
+`;
+
+const MobileInstructions = styled.div`
+  display: none;
+  margin-top: 10px;
+  padding: 10px;
+  background: rgba(238, 228, 218, 0.5);
+  border-radius: 6px;
+  text-align: center;
+  
+  @media (max-width: 768px) {
+    display: block;
+  }
+`;
+
+const SwipeDirections = styled.div`
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 5px;
+`;
+
+const SwipeArrow = styled.div`
+  font-size: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #776e65;
+  
+  span {
+    font-size: 12px;
+    margin-top: 2px;
+  }
 `;
 
 const Game2048: React.FC = () => {
@@ -119,8 +219,13 @@ const Game2048: React.FC = () => {
   const [newTile, setNewTile] = useState<{ row: number; col: number; value: number } | null>(null);
   const [mergedTiles, setMergedTiles] = useState<{ row: number; col: number; value: number }[]>([]);
   const [isAnimating, setIsAnimating] = useState<boolean>(false);
+  const [boardSize, setBoardSize] = useState<number>(500);
+  
+  // Touch gesture handling
+  const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null);
+  const gameWrapperRef = useRef<HTMLDivElement>(null);
 
-  // Initialize the game
+  // Initialize the game and set up responsive board size
   useEffect(() => {
     resetGame();
     
@@ -129,6 +234,21 @@ const Game2048: React.FC = () => {
     if (savedBestScore) {
       setBestScore(parseInt(savedBestScore, 10));
     }
+    
+    // Set board size based on container width
+    const updateBoardSize = () => {
+      if (gameWrapperRef.current) {
+        const containerWidth = gameWrapperRef.current.offsetWidth;
+        setBoardSize(containerWidth);
+      }
+    };
+    
+    updateBoardSize();
+    window.addEventListener('resize', updateBoardSize);
+    
+    return () => {
+      window.removeEventListener('resize', updateBoardSize);
+    };
   }, []);
 
   // Save best score to localStorage
@@ -162,30 +282,8 @@ const Game2048: React.FC = () => {
     setMergedTiles([]);
   };
 
-  const handleKeyDown = useCallback((event: KeyboardEvent) => {
+  const makeMove = useCallback((direction: string) => {
     if (gameOver || won || isAnimating) return;
-
-    let direction;
-    switch (event.key) {
-      case 'ArrowUp':
-        direction = DIRECTIONS.UP;
-        event.preventDefault();
-        break;
-      case 'ArrowDown':
-        direction = DIRECTIONS.DOWN;
-        event.preventDefault();
-        break;
-      case 'ArrowLeft':
-        direction = DIRECTIONS.LEFT;
-        event.preventDefault();
-        break;
-      case 'ArrowRight':
-        direction = DIRECTIONS.RIGHT;
-        event.preventDefault();
-        break;
-      default:
-        return;
-    }
 
     setIsAnimating(true);
     
@@ -209,6 +307,90 @@ const Game2048: React.FC = () => {
     }
   }, [board, gameOver, won, isAnimating]);
 
+  const handleKeyDown = useCallback((event: KeyboardEvent) => {
+    let direction;
+    switch (event.key) {
+      case 'ArrowUp':
+        direction = DIRECTIONS.UP;
+        event.preventDefault();
+        break;
+      case 'ArrowDown':
+        direction = DIRECTIONS.DOWN;
+        event.preventDefault();
+        break;
+      case 'ArrowLeft':
+        direction = DIRECTIONS.LEFT;
+        event.preventDefault();
+        break;
+      case 'ArrowRight':
+        direction = DIRECTIONS.RIGHT;
+        event.preventDefault();
+        break;
+      default:
+        return;
+    }
+
+    makeMove(direction);
+  }, [makeMove]);
+
+  // Handle touch start
+  const handleTouchStart = (e: React.TouchEvent) => {
+    // We don't call preventDefault here to allow touch events to be recognized properly
+    const touchPos = e.touches[0];
+    setTouchStart({ x: touchPos.clientX, y: touchPos.clientY });
+  };
+
+  // Handle touch move to detect swipes and prevent scrolling
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!touchStart) return;
+    e.preventDefault(); // Prevent scrolling during the game
+
+    const touchPos = e.touches[0];
+    const deltaX = touchPos.clientX - touchStart.x;
+    const deltaY = touchPos.clientY - touchStart.y;
+    const minSwipeDistance = 20;
+
+    // Only process the swipe if it exceeds minimum distance
+    if (Math.abs(deltaX) > minSwipeDistance || Math.abs(deltaY) > minSwipeDistance) {
+      if (Math.abs(deltaX) > Math.abs(deltaY)) {
+        // Horizontal swipe - we don't make the move yet to avoid multiple moves
+        // Just prevent the default behavior
+      } else {
+        // Vertical swipe - we don't make the move yet to avoid multiple moves
+        // Just prevent the default behavior
+      }
+    }
+  };
+
+  // Handle touch end
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (!touchStart) return;
+    
+    const touchEnd = e.changedTouches[0];
+    const deltaX = touchEnd.clientX - touchStart.x;
+    const deltaY = touchEnd.clientY - touchStart.y;
+    const minSwipeDistance = 50;
+    
+    // Determine swipe direction based on the largest delta
+    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > minSwipeDistance) {
+      // Horizontal swipe
+      if (deltaX > 0) {
+        makeMove(DIRECTIONS.RIGHT);
+      } else {
+        makeMove(DIRECTIONS.LEFT);
+      }
+    } else if (Math.abs(deltaY) > minSwipeDistance) {
+      // Vertical swipe
+      if (deltaY > 0) {
+        makeMove(DIRECTIONS.DOWN);
+      } else {
+        makeMove(DIRECTIONS.UP);
+      }
+    }
+    
+    setTouchStart(null);
+  };
+
   // Add keyboard event listeners
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);
@@ -223,6 +405,7 @@ const Game2048: React.FC = () => {
 
   return (
     <GameContainer>
+      <GlobalStyles />
       <Header>
         <TitleArea>
           <Title>2048</Title>
@@ -243,11 +426,17 @@ const Game2048: React.FC = () => {
         </HeaderControls>
       </Header>
 
-      <GameWrapper>
+      <GameWrapper 
+        ref={gameWrapperRef}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
         <Board 
           board={board} 
           newTile={newTile} 
-          mergedTiles={mergedTiles} 
+          mergedTiles={mergedTiles}
+          boardSize={boardSize}
         />
         
         <GameMessage $visible={won}>
@@ -265,7 +454,7 @@ const Game2048: React.FC = () => {
       </GameWrapper>
 
       <InstructionsContainer>
-        <p><strong>HOW TO PLAY:</strong> Use your arrow keys to move the tiles. When two tiles with the same number touch, they merge into one!</p>
+        <p><strong>HOW TO PLAY:</strong> Use arrow keys or swipe to move tiles. Same numbers merge.</p>
       </InstructionsContainer>
     </GameContainer>
   );
